@@ -1,0 +1,4 @@
+- name: Create Calico Deployment
+  shell: "kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml"
+- pause:
+    prompt: "Wait for containers to Pull and install"

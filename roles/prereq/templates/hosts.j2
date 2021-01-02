@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+127.0.0.1       localhost
+127.0.1.1       ubuntu2004.localdomain
+
+# The following lines are desirable for IPv6 capable hosts
+# ::1     localhost ip6-localhost ip6-loopback
+# ff02::1 ip6-allnodes
+# ff02::2 ip6-allrouters
+#
+{{ kubernetes_apiserver_vip }} api.{{ cluster_domain_name }}
+
+{% for item in play_hosts %}
+{{ hostvars[item]['ansible_' ~ interface_api]['ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_hostname'] }}.{{ cluster_domain_name }}
+{% endfor %}

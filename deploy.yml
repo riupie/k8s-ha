@@ -1,0 +1,31 @@
+- import_playbook: gather-facts.yml
+
+- hosts: all
+  gather_facts: false
+  become: yes
+  roles:
+    - {role: 'prereq', tags: 'predeploy'}
+
+- hosts: master
+  gather_facts: false
+  become: yes
+  roles:
+    - {role: 'init-master', when: "inventory_hostname == groups['master'][0]", tags: 'init-master'}
+
+- hosts: master
+  gather_facts: false
+  become: yes
+  roles:
+    - {role: 'join-master', when: "groups['master'][0] != inventory_hostname", tags: 'join-master'}
+
+- hosts: master
+  gather_facts: false
+  become: yes
+  roles:
+     - {role: 'cni', when: "inventory_hostname == groups['master'][0]", tags: 'cni'}
+
+- hosts: worker
+  gather_facts: false
+  become: yes
+  roles:
+    - {role: 'join-worker',  tags: 'join-worker'}

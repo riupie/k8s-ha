@@ -1,0 +1,43 @@
+- name: Install keepalived packages
+  apt:
+    name: keepalived
+    state: latest
+  when: "'lb' in group_names"
+
+- name: Allow to forward packet
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+  when: "'lb' in group_names"
+
+- name: Allow to bind to VIP
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+  when: "'lb' in group_names"
+
+- name: Copy keepalived.conf configuration
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  when: "'lb' in group_names"
+
+- name: Copy check_apiserver script
+  template:
+    src: check_apiserver.sh.j2
+    dest: /etc/keepalived/check_apiserver.sh
+    mode: "a+x"
+  when: "'lb' in group_names"
+
+- name: Restart keepalived service
+  service:
+    name: keepalived
+    state: restarted
+    enabled: yes
+  when: "'lb' in group_names"

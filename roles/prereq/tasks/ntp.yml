@@ -1,0 +1,25 @@
+- name: Update and upgrade apt packages
+  apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: Copy /etc/hosts mapping
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+- name: Add NTP server
+  ini_file:
+    path: /etc/systemd/timesyncd.conf
+    section: Time
+    option: NTP
+    value: "{{ ntp_server }}"
+
+- name: Restart systemd-timesyncd
+  service:
+    name: systemd-timesyncd
+    state: restarted
+
+- name: set timezone to {{ timezone  }} 
+  timezone:
+    name: "{{ timezone  }}"

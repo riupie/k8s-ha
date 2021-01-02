@@ -1,0 +1,32 @@
+- name: Install haproxy package
+  apt:
+    name: haproxy
+    state: latest
+  when: "'lb' in group_names"
+
+- name: Copy haproxy configuration file
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+  when: "'lb' in group_names"
+
+- name: Configure haproxy logging
+  copy:
+    dest: /etc/rsyslog.d/haproxy.conf
+    content: |
+      $ModLoad imuxsock
+      $AddUnixListenSocket /var/lib/haproxy/dev/log
+  when: "'lb' in group_names"
+
+- name: Restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+  when: "'lb' in group_names"
+
+- name: Restart haproxy
+  service:
+    name: haproxy
+    state: restarted
+    enabled: yes
+  when: "'lb' in group_names"

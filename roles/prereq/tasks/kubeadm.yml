@@ -1,0 +1,67 @@
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+  when: "'lb' not in group_names"
+
+- name: Turn swap off
+  shell: swapoff -a
+  when: "'lb' not in group_names"
+
+- name: Install required packages
+  apt:
+    name: "{{item}}"
+    state: latest
+  loop:
+    - apt-transport-https
+    - curl
+  when: "'lb' not in group_names"
+
+- name: Add kubernetes repo GPG key
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+  when: "'lb' not in group_names"
+- name: Add kubernetes repository
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    filename: kubernetes
+    state: present
+  when: "'lb' not in group_names"
+
+- name: Install latest kubeadm packages
+  apt:
+    name: "{{item}}"
+    update_cache: yes
+    state: latest
+  loop:
+    - kubelet
+    - kubectl
+    - kubeadm
+  when:
+    - "kubernetes_package_version is undefined"
+    - "'lb' not in group_names"
+
+- name: Install kubeadm version {{ kubernetes_package_version }}
+  apt:
+    name: "{{ item }}={{ kubernetes_package_version }}"
+    update_cache: yes
+    state: present
+  loop:
+    - kubelet
+    - kubectl
+    - kubeadm
+  when:
+    - "kubernetes_package_version is defined"
+    -  "'lb' not in group_names"
+
+- name: Hold kubeadm,kubelet and kubectl
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubectl
+    - kubeadm
+  when: "'lb' not in group_names"

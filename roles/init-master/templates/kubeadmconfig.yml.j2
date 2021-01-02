@@ -1,0 +1,15 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+#kubernetesVersion: v1.19.0
+clusterName: {{ cluster_name }}
+controlPlaneEndpoint: {{  apiserver_domain }}
+networking:
+  podSubnet: {{ kubernetes_pod_subnet }}
+apiServer:
+  extraArgs:
+    advertise-address: {{ kubernetes_apiserver_vip  }}
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd

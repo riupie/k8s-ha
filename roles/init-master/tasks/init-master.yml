@@ -1,0 +1,82 @@
+---
+- name: Create .kube folder
+  file:
+    path: "/tmp/kubeadm-ha/"
+    state: directory
+
+- name: Copy kubeadm configuration file
+  template:
+    src: kubeadmconfig.yml.j2
+    dest: /tmp/kubeadm-ha/kubeadm-config.yaml
+
+- name: Kubeadm init
+  shell: kubeadm init --config=/tmp/kubeadm-ha/kubeadm-config.yaml  --upload-certs
+  register: rslt
+
+- name: Store init output
+  action: copy content="{{ rslt.stdout }}" dest="/etc/kubernetes/kubeadm-init.stdout"
+
+- name: Create .kube folder
+  file:
+    path: "~{{ kubeadmin_user }}/.kube"
+    state: directory
+    owner: "{{ kubeadmin_user }}"
+    group: "{{ kubeadmin_user }}"
+
+- name: Copy admin.conf to .kube folder
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "~{{ kubeadmin_user }}/.kube/config"
+    owner: "{{ kubeadmin_user }}"
+    group: "{{ kubeadmin_user }}"
+    remote_src: yes
+
+- name: Copy admin.conf to .kube folder
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "~{{ kubeadmin_user }}/.kube/config"
+    owner: "{{ kubeadmin_user }}"
+    remote_src: yes
+
+- name: Create .kube folder
+  file:
+    path: "/root/.kube"
+    state: directory
+    owner: "root"
+
+- name: Copy admin.conf to .kube folder
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/root/.kube/config"
+    owner: "root"
+    remote_src: yes
+
+- name: "Fetching Kubernetes Master PKI files from primary master"
+  fetch:
+    src: /etc/kubernetes/pki/{{item}}
+    dest: /tmp/kubeadm-ha/pki/{{item}}
+    flat: yes
+  with_items:
+    - ca.crt
+    - ca.key
+    - sa.key
+    - sa.pub
+    - front-proxy-ca.crt 
+    - front-proxy-ca.key
+
+- name: "Fetching Kubernetes Master ETCD files from primary master"
+  fetch:
+    src: /etc/kubernetes/pki/etcd/{{item}}
+    dest: /tmp/kubeadm-ha/pki/etcd/{{item}}
+    flat: yes
+  with_items:
+    - ca.crt
+    - ca.key
+
+- name: "Fetching Kubernetes Master Admin files from primary master"
+  fetch:
+    src: /etc/kubernetes/{{item}}
+    dest: /tmp/kubeadm-ha/{{item}}
+    flat: yes
+  with_items:
+    - admin.conf 

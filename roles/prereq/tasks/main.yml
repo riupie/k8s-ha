@@ -1,0 +1,6 @@
+---
+- import_tasks: ntp.yml
+- import_tasks: keepalived.yml
+- import_tasks: haproxy.yml
+- import_tasks: containerd.yml
+- import_tasks: kubeadm.yml

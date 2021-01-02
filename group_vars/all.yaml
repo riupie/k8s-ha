@@ -1,0 +1,12 @@
+kubernetes_package_version: 1.19.6-00
+interface_api: "eth1"
+kubernetes_apiserver_vip: "10.54.54.10"
+kubernetes_pod_subnet: "10.244.0.0/16"
+keepalived_auth_pass: "keepitsecret123"
+ntp_server: "0.id.pool.ntp.org"
+timezone: "Asia/Jakarta"
+apiserver_domain: "api.{{ cluster_domain_name  }}"
+cluster_name: "kubernetes"
+cluster_domain_name: "k8s.riupie.io"
+kubeadmin_user: vagrant
+
